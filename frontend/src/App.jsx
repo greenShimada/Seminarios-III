@@ -1,15 +1,17 @@
 import React from 'react';
 import './App.css';
-import FruitList from './components/Fruits';
+import AtividadeList from './components/AtividadeList';
+import ListaList from './components/ListaList';
 
 const App = () => {
   return (
     <div>
       <header>
-        <h1>Fruit Management App</h1>
+        <h1>Atividades</h1>
       </header>
       <main>
-        <FruitList />
+        <AtividadeList />
+        <ListaList />
       </main>
     </div>
   );
