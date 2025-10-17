@@ -4,7 +4,7 @@ const AddAtividadeForm = ({ addAtividade }) => {
   const [frase, setFrase] = useState('');
   const [pergunta, setPergunta] = useState('');
   const [opcoes, setOpcoes] = useState(['', '', '', '']);
-  const [respostaCorreta, setRespostaCorreta] = useState(0);
+  const [respostaCorreta, setRespostaCorreta] = useState(null);
 
   const handleChangeOpcao = (index, value) => {
     const novasOpcoes = [...opcoes];
@@ -15,8 +15,8 @@ const AddAtividadeForm = ({ addAtividade }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (respostaCorreta < 0 || respostaCorreta >= opcoes.length) {
-      alert("Índice da resposta correta inválido");
+    if (respostaCorreta === null || respostaCorreta < 0 || respostaCorreta >= opcoes.length) {
+      alert("Selecione a resposta correta");
       return;
     }
     if (!frase || !pergunta || opcoes.some(opcao => opcao.trim() === '')) {
@@ -36,7 +36,7 @@ const AddAtividadeForm = ({ addAtividade }) => {
     setFrase('');
     setPergunta('');
     setOpcoes(['', '', '', '']);
-    setRespostaCorreta(0);
+    setRespostaCorreta(null);
   };
 
   return (
@@ -57,28 +57,23 @@ const AddAtividadeForm = ({ addAtividade }) => {
       />
 
       {opcoes.map((opcao, i) => (
-        <input
-          key={i}
-          type="text"
-          placeholder={`Opção ${i + 1}`}
-          value={opcao}
-          onChange={(e) => handleChangeOpcao(i, e.target.value)}
-          required
-        />
+        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <input
+            type="radio"
+            name="respostaCorreta"
+            checked={respostaCorreta === i}
+            onChange={() => setRespostaCorreta(i)}
+            required
+          />
+          <input
+            type="text"
+            placeholder={`Opção ${i + 1}`}
+            value={opcao}
+            onChange={(e) => handleChangeOpcao(i, e.target.value)}
+            required
+          />
+        </div>
       ))}
-
-      <input
-        type="number"
-        placeholder="Índice da resposta correta (0-3)"
-        value={respostaCorreta}
-        onChange={(e) => {
-          const val = parseInt(e.target.value);
-          setRespostaCorreta(isNaN(val) ? 0 : val);
-        }}
-        min={0}
-        max={3}
-        required
-      />
 
       <button type="submit">Cadastrar Atividade</button>
     </form>

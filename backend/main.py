@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
-
+from fastapi import Body
 from database.database import SessionLocal, engine, Base
 from database.models import Atividade, ListaAtividades
 
 from database.schemas import *
-
+from pydantic import BaseModel
 app = FastAPI()
 
 from fastapi import FastAPI
@@ -68,7 +68,7 @@ def listar_listas(db: Session = Depends(get_db)):
     listas = db.query(ListaAtividades).all()
     return listas
 
-@app.post("/listas/", response_model=ListaAtividadeRead)
+@app.post("/listas/", response_model=ListaAtividadeCreate)
 def criar_lista(lista: ListaAtividadeCreate, db: Session = Depends(get_db)):
     print("aopa")
     lista_existente = db.query(ListaAtividades).filter(
@@ -114,3 +114,25 @@ def criar_lista(lista: ListaAtividadeCreate, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(nova_lista)
         return nova_lista
+
+class AtividadeIdRequest(BaseModel):
+    atividade_id: int
+
+@app.post("/listas/{lista_id}/atividades")
+def adicionar_atividade_na_lista(
+    lista_id: int,
+    atividade_req: AtividadeIdRequest,
+    db: Session = Depends(get_db)
+):
+    atividade_id = atividade_req.atividade_id
+    lista = db.query(ListaAtividades).filter(ListaAtividades.id == lista_id).first()
+    atividade = db.query(Atividade).filter(Atividade.id == atividade_id).first()
+
+    if not lista or not atividade:
+        raise HTTPException(status_code=404, detail="Lista ou Atividade não encontrada")
+
+    if atividade not in lista.atividades:
+        lista.atividades.append(atividade)
+        db.commit()
+
+    return {"message": "Atividade adicionada à lista"}
